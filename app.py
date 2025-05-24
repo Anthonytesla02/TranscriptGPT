@@ -37,7 +37,27 @@ rag_service = RAGService()
 with app.app_context():
     # Import models
     import models
+    
+    # Create tables
     db.create_all()
+    
+    # Add new columns to existing video table if they don't exist
+    try:
+        with db.engine.connect() as conn:
+            # Check if new columns exist, if not add them
+            result = conn.execute(db.text("PRAGMA table_info(video)"))
+            columns = [row[1] for row in result]
+            
+            if 'duration_seconds' not in columns:
+                conn.execute(db.text("ALTER TABLE video ADD COLUMN duration_seconds INTEGER DEFAULT 0"))
+            if 'view_count' not in columns:
+                conn.execute(db.text("ALTER TABLE video ADD COLUMN view_count INTEGER DEFAULT 0"))
+            if 'author' not in columns:
+                conn.execute(db.text("ALTER TABLE video ADD COLUMN author VARCHAR(200) DEFAULT ''"))
+            
+            conn.commit()
+    except Exception as e:
+        logging.warning(f"Schema update warning: {e}")
 
 @app.route('/')
 def index():
@@ -166,6 +186,184 @@ def delete_video(video_id):
         flash('Failed to delete video', 'error')
     
     return redirect(url_for('index'))
+
+# PREMIUM FEATURE 1: AI-Powered Video Summaries
+@app.route('/summarize/<int:video_id>')
+def summarize_video(video_id):
+    """Generate AI summary of video content"""
+    video = models.Video.query.get_or_404(video_id)
+    
+    # Check if summary already exists
+    existing_summary = models.VideoSummary.query.filter_by(
+        video_id=video_id, summary_type='brief'
+    ).first()
+    
+    if existing_summary:
+        summary = existing_summary.content
+    else:
+        # Generate new summary
+        summary = generate_video_summary(video)
+        if summary:
+            # Save to database
+            summary_obj = models.VideoSummary(
+                video_id=video_id,
+                summary_type='brief',
+                content=summary
+            )
+            db.session.add(summary_obj)
+            db.session.commit()
+    
+    return jsonify({'summary': summary})
+
+# PREMIUM FEATURE 2: Smart Question Suggestions
+@app.route('/smart_questions/<int:video_id>')
+def smart_questions(video_id):
+    """Generate intelligent questions about video content"""
+    video = models.Video.query.get_or_404(video_id)
+    questions = generate_smart_questions(video)
+    return jsonify({'questions': questions})
+
+# PREMIUM FEATURE 3: Knowledge Base Insights
+@app.route('/insights')
+def knowledge_insights():
+    """Generate insights across all videos in knowledge base"""
+    videos = models.Video.query.filter_by(processed=True).all()
+    if not videos:
+        return jsonify({'insights': 'No videos in knowledge base yet.'})
+    
+    insights = generate_knowledge_insights(videos)
+    return jsonify({'insights': insights})
+
+def generate_video_summary(video):
+    """Generate AI-powered video summary"""
+    try:
+        prompt = f"""Create a concise 2-3 sentence summary of this YouTube video transcript:
+
+{video.transcript[:3000]}
+
+Focus on the main topic and key takeaway."""
+
+        headers = {
+            "Authorization": f"Bearer {os.getenv('MISTRAL_API_KEY')}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "model": "mistral-large-latest",
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 300,
+            "temperature": 0.3
+        }
+        
+        response = requests.post(
+            "https://api.mistral.ai/v1/chat/completions",
+            headers=headers,
+            json=data
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result["choices"][0]["message"]["content"]
+        else:
+            return "Could not generate summary at this time."
+            
+    except Exception as e:
+        logging.error(f"Summary generation error: {str(e)}")
+        return "Error generating summary."
+
+def generate_smart_questions(video):
+    """Generate intelligent questions about video content"""
+    try:
+        prompt = f"""Based on this YouTube video transcript, generate 5 smart, engaging questions that would help someone explore the content deeper:
+
+{video.transcript[:3000]}
+
+Questions should be:
+- Thought-provoking and specific to the content
+- Help users understand key concepts better
+- Encourage deeper exploration of the topic
+
+Format as a simple list."""
+
+        headers = {
+            "Authorization": f"Bearer {os.getenv('MISTRAL_API_KEY')}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "model": "mistral-large-latest",
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 400,
+            "temperature": 0.4
+        }
+        
+        response = requests.post(
+            "https://api.mistral.ai/v1/chat/completions",
+            headers=headers,
+            json=data
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            questions_text = result["choices"][0]["message"]["content"]
+            # Split into individual questions
+            questions = [q.strip() for q in questions_text.split('\n') if q.strip() and not q.strip().isdigit()]
+            return questions[:5]  # Return max 5 questions
+        else:
+            return ["What are the main points discussed in this video?"]
+            
+    except Exception as e:
+        logging.error(f"Questions generation error: {str(e)}")
+        return ["What are the key insights from this video?"]
+
+def generate_knowledge_insights(videos):
+    """Generate insights across multiple videos"""
+    try:
+        # Combine video titles and brief content samples
+        content_sample = "\n\n".join([
+            f"Video: {video.title}\nContent: {video.transcript[:500]}..."
+            for video in videos[:5]  # Limit to 5 videos for token management
+        ])
+        
+        prompt = f"""Analyze this collection of YouTube video content and provide insights:
+
+{content_sample}
+
+Please provide:
+1. Common themes across the videos
+2. Key topics that emerge
+3. Interesting connections between different videos
+4. Overall knowledge base characteristics
+
+Keep the analysis concise but insightful."""
+
+        headers = {
+            "Authorization": f"Bearer {os.getenv('MISTRAL_API_KEY')}",
+            "Content-Type": "application/json"
+        }
+        
+        data = {
+            "model": "mistral-large-latest",
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 500,
+            "temperature": 0.3
+        }
+        
+        response = requests.post(
+            "https://api.mistral.ai/v1/chat/completions",
+            headers=headers,
+            json=data
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result["choices"][0]["message"]["content"]
+        else:
+            return "Unable to generate insights at this time."
+            
+    except Exception as e:
+        logging.error(f"Insights generation error: {str(e)}")
+        return "Error analyzing knowledge base."
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
