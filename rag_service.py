@@ -4,6 +4,7 @@ import logging
 import numpy as np
 import requests
 import json
+import time
 from sklearn.metrics.pairwise import cosine_similarity
 
 class RAGService:
@@ -208,21 +209,36 @@ Please provide a helpful and accurate answer based only on the information in th
                 "temperature": 0.3
             }
             
-            response = requests.post(
-                f"{self.base_url}/chat/completions",
-                headers=headers,
-                json=data
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                answer = result["choices"][0]["message"]["content"]
-            else:
-                self.logger.error(f"Chat API error: {response.status_code} - {response.text}")
-                return {
-                    'answer': "Sorry, I encountered an error with the AI service. Please try again.",
-                    'sources': []
-                }
+            # Retry logic for rate limiting
+            max_retries = 3
+            for attempt in range(max_retries):
+                response = requests.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=headers,
+                    json=data
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    answer = result["choices"][0]["message"]["content"]
+                    break
+                elif response.status_code == 429:  # Rate limit
+                    if attempt < max_retries - 1:
+                        wait_time = 2 ** attempt  # Exponential backoff
+                        self.logger.info(f"Rate limit hit, waiting {wait_time} seconds before retry {attempt + 1}")
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        return {
+                            'answer': "I'm getting too many requests right now. Please wait a moment and try again.",
+                            'sources': []
+                        }
+                else:
+                    self.logger.error(f"Chat API error: {response.status_code} - {response.text}")
+                    return {
+                        'answer': "Sorry, I encountered an error with the AI service. Please try again.",
+                        'sources': []
+                    }
             
             # Prepare sources
             sources = []
