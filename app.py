@@ -53,7 +53,11 @@ def upload_videos():
         flash('Please provide at least one YouTube URL', 'error')
         return redirect(url_for('index'))
     
-    url_list = [url.strip() for url in urls.split('\n') if url.strip()]
+    # Handle both single URLs and multiple URLs (separated by newlines, commas, or spaces)
+    import re
+    # Split by newlines, commas, or multiple spaces
+    url_list = re.split(r'[\n,\s]+', urls)
+    url_list = [url.strip() for url in url_list if url.strip()]
     
     if not url_list:
         flash('Please provide valid YouTube URLs', 'error')

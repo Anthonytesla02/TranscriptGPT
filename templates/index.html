@@ -66,17 +66,17 @@
                     <div class="card-body">
                         <form method="POST" action="{{ url_for('upload_videos') }}">
                             <div class="mb-3">
-                                <label for="urls" class="form-label">YouTube URLs (one per line)</label>
+                                <label for="urls" class="form-label">YouTube URLs</label>
                                 <textarea 
                                     class="form-control" 
                                     id="urls" 
                                     name="urls" 
                                     rows="5" 
-                                    placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ&#10;https://youtu.be/dQw4w9WgXcQ&#10;..."
+                                    placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ&#10;https://youtu.be/dQw4w9WgXcQ&#10;&#10;Or paste multiple URLs separated by commas or spaces..."
                                     required
                                 ></textarea>
                                 <div class="form-text">
-                                    Paste YouTube video URLs, one per line. Supports various YouTube URL formats.
+                                    Paste single or multiple YouTube URLs. You can separate them with new lines, commas, or spaces. Supports all YouTube URL formats.
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary">
