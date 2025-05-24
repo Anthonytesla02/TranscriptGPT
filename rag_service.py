@@ -3,8 +3,12 @@ import re
 import logging
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
+try:
+    from mistralai.client import MistralClient
+    from mistralai.models.chat_completion import ChatMessage
+except ImportError:
+    # Fallback for newer API structure
+    from mistralai import Mistral as MistralClient
 
 class RAGService:
     def __init__(self):
@@ -62,9 +66,9 @@ class RAGService:
             return None
         
         try:
-            response = self.client.embeddings(
+            response = self.client.embeddings.create(
                 model="mistral-embed",
-                input=texts
+                inputs=texts
             )
             return np.array([embedding.embedding for embedding in response.data])
         except Exception as e:
@@ -179,10 +183,10 @@ Please provide a helpful and accurate answer based only on the information in th
 
             # Get response from Mistral
             messages = [
-                ChatMessage(role="user", content=prompt)
+                {"role": "user", "content": prompt}
             ]
             
-            response = self.client.chat(
+            response = self.client.chat.complete(
                 model="mistral-large-latest",
                 messages=messages,
                 max_tokens=500,
