@@ -2,22 +2,18 @@ import os
 import re
 import logging
 import numpy as np
+import requests
+import json
 from sklearn.metrics.pairwise import cosine_similarity
-try:
-    from mistralai.client import MistralClient
-    from mistralai.models.chat_completion import ChatMessage
-except ImportError:
-    # Fallback for newer API structure
-    from mistralai import Mistral as MistralClient
 
 class RAGService:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        api_key = os.getenv("MISTRAL_API_KEY", "")
-        if not api_key:
+        self.api_key = os.getenv("MISTRAL_API_KEY", "")
+        if not self.api_key:
             self.logger.warning("MISTRAL_API_KEY not found in environment variables")
         
-        self.client = MistralClient(api_key=api_key) if api_key else None
+        self.base_url = "https://api.mistral.ai/v1"
         self.documents = {}  # {doc_id: {'text': str, 'title': str, 'chunks': [str], 'embeddings': np.array}}
         self.chunk_size = 1000
         self.chunk_overlap = 200
@@ -61,16 +57,34 @@ class RAGService:
     
     def get_embeddings(self, texts):
         """Get embeddings for texts using Mistral API"""
-        if not self.client:
-            self.logger.error("Mistral client not initialized")
+        if not self.api_key:
+            self.logger.error("Mistral API key not found")
             return None
         
         try:
-            response = self.client.embeddings.create(
-                model="mistral-embed",
-                inputs=texts
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            data = {
+                "model": "mistral-embed",
+                "input": texts
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/embeddings",
+                headers=headers,
+                json=data
             )
-            return np.array([embedding.embedding for embedding in response.data])
+            
+            if response.status_code == 200:
+                result = response.json()
+                return np.array([embedding["embedding"] for embedding in result["data"]])
+            else:
+                self.logger.error(f"Embeddings API error: {response.status_code} - {response.text}")
+                return None
+                
         except Exception as e:
             self.logger.error(f"Failed to get embeddings: {str(e)}")
             return None
@@ -152,7 +166,7 @@ class RAGService:
     
     def chat(self, message):
         """Generate response using RAG"""
-        if not self.client:
+        if not self.api_key:
             return {
                 'answer': "Sorry, the AI service is not available. Please check that MISTRAL_API_KEY is set.",
                 'sources': []
@@ -182,18 +196,33 @@ User question: {message}
 Please provide a helpful and accurate answer based only on the information in the transcripts above."""
 
             # Get response from Mistral
-            messages = [
-                {"role": "user", "content": prompt}
-            ]
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
             
-            response = self.client.chat.complete(
-                model="mistral-large-latest",
-                messages=messages,
-                max_tokens=500,
-                temperature=0.3
+            data = {
+                "model": "mistral-large-latest",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 500,
+                "temperature": 0.3
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/chat/completions",
+                headers=headers,
+                json=data
             )
             
-            answer = response.choices[0].message.content
+            if response.status_code == 200:
+                result = response.json()
+                answer = result["choices"][0]["message"]["content"]
+            else:
+                self.logger.error(f"Chat API error: {response.status_code} - {response.text}")
+                return {
+                    'answer': "Sorry, I encountered an error with the AI service. Please try again.",
+                    'sources': []
+                }
             
             # Prepare sources
             sources = []
