@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - YouTube Transcript RAG</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-video me-2"></i>
+                YouTube Transcript RAG
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('index') }}">
+                    <i class="fas fa-upload me-1"></i>
+                    Upload Videos
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid my-3">
+        <div class="row h-100">
+            <!-- Sidebar with video list -->
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-list me-2"></i>
+                            Knowledge Base ({{ videos|length }} videos)
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for video in videos %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ video.title[:50] }}{% if video.title|length > 50 %}...{% endif %}</h6>
+                                </div>
+                                <p class="mb-1 text-muted small">
+                                    {{ video.transcript|length }} characters
+                                </p>
+                                <small class="text-muted">
+                                    {{ video.created_at.strftime('%Y-%m-%d') }}
+                                </small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Interface -->
+            <div class="col-md-9">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-comments me-2"></i>
+                            Chat with Your Videos
+                        </h5>
+                    </div>
+                    <div class="card-body d-flex flex-column p-0">
+                        <!-- Chat Messages -->
+                        <div id="chat-messages" class="flex-grow-1 p-3 overflow-auto" style="min-height: 400px; max-height: 60vh;">
+                            <div class="chat-message assistant-message">
+                                <div class="message-content">
+                                    <i class="fas fa-robot me-2"></i>
+                                    Hello! I'm ready to answer questions about your YouTube videos. Ask me anything about the content you've uploaded.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Input -->
+                        <div class="border-top p-3">
+                            <form id="chat-form" class="d-flex gap-2">
+                                <input 
+                                    type="text" 
+                                    id="message-input" 
+                                    class="form-control" 
+                                    placeholder="Ask a question about your videos..."
+                                    required
+                                >
+                                <button type="submit" class="btn btn-primary" id="send-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
