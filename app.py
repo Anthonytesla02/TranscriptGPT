@@ -61,8 +61,13 @@ with app.app_context():
         logging.warning(f"Schema update warning: {e}")
 
 @app.route('/')
+def landing():
+    """Landing page"""
+    return render_template('landing.html')
+
+@app.route('/dashboard')
 def index():
-    """Main page for uploading YouTube videos"""
+    """Main dashboard for uploading YouTube videos"""
     videos = models.Video.query.filter_by(processed=True).all()
     return render_template('index.html', videos=videos)
 

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Transcript RAG - Transform Videos into Knowledge</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .premium-badge {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .cta-button {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            transition: transform 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .demo-video {
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .stats-number {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark position-fixed w-100" style="z-index: 1000; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px);">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-brain me-2"></i>
+                YouTube Transcript RAG
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="#features">Features</a>
+                <a class="nav-link" href="#pricing">Pricing</a>
+                <a class="nav-link" href="#how-it-works">How It Works</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-3 fw-bold text-white mb-4">
+                        Transform YouTube Videos into 
+                        <span style="background: linear-gradient(45deg, #f093fb, #f5576c); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                            Interactive Knowledge
+                        </span>
+                    </h1>
+                    <p class="lead text-white-50 mb-4">
+                        Upload any YouTube video, get instant AI-powered summaries, smart questions, and chat with the content using advanced RAG technology.
+                    </p>
+                    <div class="d-flex gap-3 mb-4">
+                        <a href="{{ url_for('index') }}" class="btn cta-button text-white">
+                            <i class="fas fa-rocket me-2"></i>
+                            Get Started Free
+                        </a>
+                        <button class="btn btn-outline-light btn-lg" onclick="scrollToDemo()">
+                            <i class="fas fa-play me-2"></i>
+                            See Demo
+                        </button>
+                    </div>
+                    <div class="d-flex gap-4 text-white-50">
+                        <small><i class="fas fa-check me-1"></i> No Credit Card Required</small>
+                        <small><i class="fas fa-check me-1"></i> Start in 30 Seconds</small>
+                        <small><i class="fas fa-check me-1"></i> Premium Features Available</small>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="demo-video">
+                        <img src="https://via.placeholder.com/600x400/667eea/ffffff?text=YouTube+RAG+Demo" 
+                             alt="Demo" class="img-fluid demo-video">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-5" style="background: rgba(0, 0, 0, 0.1);">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <div class="stats-number">10K+</div>
+                    <p class="text-muted">Videos Processed</p>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-number">95%</div>
+                    <p class="text-muted">Accuracy Rate</p>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-number">2.5x</div>
+                    <p class="text-muted">Faster Learning</p>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-number">24/7</div>
+                    <p class="text-muted">AI Availability</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-4 fw-bold mb-3">Powerful Features</h2>
+                <p class="lead text-muted">Everything you need to transform videos into actionable knowledge</p>
+            </div>
+            
+            <div class="row g-4">
+                <!-- Core Features -->
+                <div class="col-md-4 text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <h4>Smart Upload</h4>
+                    <p class="text-muted">Upload multiple YouTube URLs in any format. Our system automatically extracts and processes transcripts with 99% accuracy.</p>
+                </div>
+                
+                <div class="col-md-4 text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h4>Interactive Chat</h4>
+                    <p class="text-muted">Chat naturally with your video content. Ask questions, get detailed answers with source citations and context.</p>
+                </div>
+                
+                <div class="col-md-4 text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h4>Semantic Search</h4>
+                    <p class="text-muted">Advanced AI finds relevant content across all your videos using vector embeddings and similarity matching.</p>
+                </div>
+                
+                <!-- Premium Features -->
+                <div class="col-md-4 text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h4>AI Summaries <span class="premium-badge">PREMIUM</span></h4>
+                    <p class="text-muted">Get instant, intelligent summaries of any video. Save hours by understanding key points in seconds.</p>
+                </div>
+                
+                <div class="col-md-4 text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h4>Smart Questions <span class="premium-badge">PREMIUM</span></h4>
+                    <p class="text-muted">AI generates thoughtful questions to help you explore content deeper and discover new insights.</p>
+                </div>
+                
+                <div class="col-md-4 text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h4>Knowledge Insights <span class="premium-badge">PREMIUM</span></h4>
+                    <p class="text-muted">Discover patterns and connections across your entire video library with cross-content analysis.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-5" style="background: rgba(0, 0, 0, 0.05);">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-4 fw-bold mb-3">How It Works</h2>
+                <p class="lead text-muted">Transform any YouTube video into interactive knowledge in 3 simple steps</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <span class="text-white fw-bold fs-4">1</span>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5>Upload Videos</h5>
+                            <p class="text-muted">Paste YouTube URLs (single or multiple). Our AI extracts transcripts and processes them into searchable chunks.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <span class="text-white fw-bold fs-4">2</span>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5>AI Processing</h5>
+                            <p class="text-muted">Advanced RAG technology creates vector embeddings, enabling semantic search and intelligent responses.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <span class="text-white fw-bold fs-4">3</span>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5>Chat & Explore</h5>
+                            <p class="text-muted">Ask questions, get summaries, explore with smart questions, and discover insights across your knowledge base.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-4 fw-bold mb-3">Simple, Transparent Pricing</h2>
+                <p class="lead text-muted">Start free, upgrade when you need premium features</p>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="pricing-card">
+                        <h3 class="text-center">Free</h3>
+                        <div class="text-center mb-4">
+                            <span class="display-4 fw-bold">$0</span>
+                            <span class="text-muted">/month</span>
+                        </div>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Upload 3 videos</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Basic chat functionality</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Semantic search</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Source citations</li>
+                        </ul>
+                        <div class="text-center">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-primary btn-lg w-100">Get Started Free</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-5">
+                    <div class="pricing-card border border-primary position-relative">
+                        <div class="position-absolute top-0 start-50 translate-middle">
+                            <span class="badge bg-primary px-3 py-2">Most Popular</span>
+                        </div>
+                        <h3 class="text-center">Premium</h3>
+                        <div class="text-center mb-4">
+                            <span class="display-4 fw-bold">$9.99</span>
+                            <span class="text-muted">/month</span>
+                        </div>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Unlimited videos</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> All free features</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> <strong>AI-powered summaries</strong></li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> <strong>Smart question generator</strong></li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> <strong>Knowledge base insights</strong></li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Priority support</li>
+                        </ul>
+                        <div class="text-center">
+                            <a href="{{ url_for('index') }}" class="btn cta-button text-white btn-lg w-100">Start Premium Trial</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container text-center">
+            <h2 class="display-4 fw-bold text-white mb-3">Ready to Transform Your Learning?</h2>
+            <p class="lead text-white-50 mb-4">Join thousands of users who are already turning YouTube videos into actionable knowledge</p>
+            <a href="{{ url_for('index') }}" class="btn btn-light btn-lg px-5 py-3">
+                <i class="fas fa-rocket me-2"></i>
+                Get Started Now - It's Free!
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4" style="background: rgba(0, 0, 0, 0.1);">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-brain me-2"></i>YouTube Transcript RAG</h5>
+                    <p class="text-muted">Transform videos into interactive knowledge with AI.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted">&copy; 2024 YouTube Transcript RAG. Powered by Mistral AI.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function scrollToDemo() {
+            document.querySelector('#features').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Add smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
